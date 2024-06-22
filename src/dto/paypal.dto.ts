@@ -60,33 +60,33 @@ export interface PaypalChckoutResult {
       };
     };
   };
-  purchase_units: {
-    shipping: {
-      address: {
-        address_line_1: string;
-        admin_area_1: string;
-        admin_area_2: string;
-        postal_code: string;
-        country_code: string;
-      };
-    };
-    payments: {
-      captures: {
-        eller_receivable_breakdown: {
-          gross_amount: {
-            currency_code: string;
-            value: string;
-          };
-          paypal_fee: {
-            currency_code: string;
-            value: string;
-          };
-          net_amount: {
-            currency_code: string;
-            value: string;
-          };
+  purchase_units: [
+    {
+      shipping: {
+        address: {
+          address_line_1: string;
+          admin_area_1: string;
+          admin_area_2: string;
+          postal_code: string;
+          country_code: string;
         };
       };
-    };
-  };
+      payments: {
+        captures: [
+          {
+            seller_receivable_breakdown: {
+              gross_amount: {
+                currency_code: string;
+                value: string;
+              };
+              net_amount: {
+                currency_code: string;
+                value: string;
+              };
+            };
+          }
+        ];
+      };
+    }
+  ];
 }
