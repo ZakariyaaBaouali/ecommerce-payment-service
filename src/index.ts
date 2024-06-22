@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import { PORT } from "./config";
 import { PaymentRouter } from "./routes";
+import { PaymentRepo } from "./db";
 
 //🚀🚀
 const app = express();
@@ -12,6 +13,8 @@ app.use(
     methods: ["GET", "POST", "PATCH", "DELETE"],
   })
 );
+//export db to all the app comps
+export const paymentDB = new PaymentRepo();
 
 //routes
 app.use("/api/pay", PaymentRouter);
