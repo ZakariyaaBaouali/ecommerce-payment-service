@@ -1,8 +1,9 @@
 import Stripe from "stripe";
 import { PORT, STRIPE_SECRET_KEY } from "../config";
-import { IShoppingCart } from "../dto";
-import { StripeProductItem } from "../dto/stripe.dto";
+import { IPayment, IShoppingCart } from "../dto";
+import { StripePaymentIntent, StripeProductItem } from "../dto/stripe.dto";
 import { productDB } from "../../mockData";
+import { paymentDB } from "..";
 
 //🚀🚀
 const key = STRIPE_SECRET_KEY || "";
@@ -41,7 +42,35 @@ class StripeService {
       expand: ["payment_intent.payment_method"],
     });
     if (details) {
-      return details;
+      //create new pay 🚀🚀
+      const email = details.customer_details?.email;
+      const full_name = details.customer_details?.name;
+      const address = details.customer_details?.address;
+      const status = details.status;
+      const total = details.amount_total;
+      const subTotal = details.amount_subtotal;
+      const payment_intent = details?.payment_intent as StripePaymentIntent;
+      const { brand, country, exp_month, exp_year, last4 } =
+        payment_intent.payment_method.card;
+      //
+      const newPay = {
+        email: email ? email : "",
+        full_name: full_name ? full_name : "",
+        address: JSON.stringify(address),
+        amount_total: total ? total : 0,
+        amount_subTotal: subTotal ? subTotal : 0,
+        provider: "STRIPE",
+        status: status ? status : "",
+        card_details: JSON.stringify({
+          brand,
+          country,
+          exp_month,
+          exp_year,
+          last4,
+        }),
+      };
+      const res = await paymentDB.CreatePayment(newPay);
+      return res;
     }
     return null;
   }
