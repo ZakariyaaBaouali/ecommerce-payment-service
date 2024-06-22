@@ -14,6 +14,7 @@ import {
 } from "../dto/paypal.dto";
 import { IShoppingCart } from "../dto";
 import { productDB } from "../../mockData";
+import { paymentDB } from "..";
 
 //🚀🚀
 class PaypalService {
@@ -79,7 +80,7 @@ class PaypalService {
   public async getOrderDetails(
     token: string,
     order_id: string
-  ): Promise<PaypalChckoutResult | null> {
+  ): Promise<any | null> {
     const paypal_url = `${PAYPAL_BASE_URL}/v2/checkout/orders/${order_id}/capture`;
     //
     const response = await axios({
@@ -93,7 +94,26 @@ class PaypalService {
 
     //
     if (response) {
-      return response.data as PaypalChckoutResult;
+      //
+      const data = response.data as PaypalChckoutResult;
+      const email = data.payment_source.paypal.email_address;
+      const { given_name, surname } = data.payment_source.paypal.name;
+      const address = data.purchase_units[0].shipping.address || "";
+      const { gross_amount, net_amount } =
+        data.purchase_units[0].payments.captures[0].seller_receivable_breakdown;
+      const { status } = data;
+      //create new payment 🚀🚀🚀
+      const newPay = {
+        email,
+        full_name: `${given_name} ${surname}`,
+        address: JSON.stringify(address),
+        amount_total: Number(gross_amount.value),
+        amount_subTotal: Number(net_amount.value),
+        provider: "PAYPAL",
+        status,
+      };
+      const res = await paymentDB.CreatePayment(newPay);
+      return res;
     }
     return null;
   }
